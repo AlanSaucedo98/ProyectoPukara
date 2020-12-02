@@ -4,7 +4,7 @@ const ObjectId = Schema.ObjectId;
 require('mongoose-type-email');
 
 
-const ChatbouUsersSchema = new Schema({
+const ChatbotUsersSchema = new Schema({
     firstName: String,
     city: String,
     country: String,
@@ -16,4 +16,4 @@ const ChatbouUsersSchema = new Schema({
 });
 
 
-module.exports= mongoose.model("chatbotUsers",ChatbouUsersSchema);
+module.exports= mongoose.model("chatbotUsers",ChatbotUsersSchema);

@@ -49,11 +49,13 @@ app.post("/",async (req, res) => {
             } = req.body.queryResult.parameters
 
             //console.log(req.body); //Linea para ver datos recibidos.
+
+
             saveUserData(nombre,ciudad,country,dni,email);
 
             res.json({
-                fulfillmentText: `Bienvenido ${nombre} .Sus datos son :
-                nombre: ${nombre},ciudad : ${ciudad},country: ${country},DNI : ${dni},email : ${email}`
+                fulfillmentText: `Sus datos son :
+                nombre: ${nombre},ciudad : ${ciudad},country: ${country},DNI : ${dni},email : ${email}.Si los datos son correcto escriba "Si" de lo contrario ingrese "No"`
             })
             async function saveUserData (nombre,ciudad,country,dni,email){
                 let isRegistered = await chatbotUsers.findOne({emails:email});
