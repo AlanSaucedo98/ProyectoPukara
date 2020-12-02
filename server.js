@@ -2,15 +2,15 @@ const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 
+
 //mongodb models
 
 const chatbotUsers = require("./Models/chatbotUsers");
 
+//Controlladores
+var userApiRouter = require('./controllers/usersController')
 
-
-// chatbotUsers.find({},(err,res)=>{
-//     console.log(res);
-// });
+  
 
 
 
@@ -21,7 +21,7 @@ app.use(express.json());
 //Creo ruta  via post para la visualizacion de los datos de DialogFlow
 app.post("/",async (req, res) => {
 
-    mongoose.connect('mongodb+srv://alansaucedo:proyectopukara@cluster0.rvmng.mongodb.net/chatbotdb?retryWrites=true&w=majority', {
+    await mongoose.connect('mongodb+srv://alansaucedo:proyectopukara@cluster0.rvmng.mongodb.net/chatbotdb?retryWrites=true&w=majority', {
         useNewUrlParser: true,
         useUnifiedTopology: true,
         useFindAndModify: false,
@@ -55,7 +55,11 @@ app.post("/",async (req, res) => {
                 fulfillmentText: `Bienvenido ${nombre} .Sus datos son :
                 nombre: ${nombre},ciudad : ${ciudad},country: ${country},DNI : ${dni},email : ${email}`
             })
-            function saveUserData (nombre,ciudad,country,dni,email){
+            async function saveUserData (nombre,ciudad,country,dni,email){
+                let isRegistered = await chatbotUsers.findOne({emails:email});
+                if (isRegistered) return;
+                
+
                 let ChatbotUser = new chatbotUsers({
                     firstName: nombre,
                     city: ciudad,
@@ -70,26 +74,37 @@ app.post("/",async (req, res) => {
                 })
             }
 
-            break;
-            case "Login":
-
             
-
-
-
-
-
             break;
-        default:
-            res.json({
-                fulfillmentText: "No entiendo nada"
-            })
-            break;
+        
     }
 
+    if(action == "login"){
 
+            const {email} = req.body.queryResult.parameters
+
+            console.log(req.body);
+
+            login(email)
+
+            async function login (email){
+
+                let isRegistered = await chatbotUsers.findOne({emails:email});
+                if (isRegistered) 
+                    res.json({
+                        fulfillmentText: "Sesion Iniciada Correctamente . Ingrese el numero de la opcion por la cual desea obtener informacion : 1-Bitcoin  , 2:Ethereum  ,3- Monero "
+                    })
+                if(!isRegistered)
+                res.json({
+                    fulfillmentText: "No se encontro una cuenta asosiada a ese email "
+                })
+
+            }
+
+        }
 
 
 })
 
+app.use('/api',userApiRouter.all)
 app.listen(3000)
