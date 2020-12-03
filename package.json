@@ -10,10 +10,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.21.0",
     "express": "^4.17.1",
     "mongoose": "^5.10.17",
     "mongoose-type-email": "^1.1.2",
     "node": "^15.3.0",
-    "nodemon": "^2.0.6"
+    "nodemon": "^2.0.6",
+    "vue": "^2.6.12",
+    "vue-axios": "^3.2.0"
   }
 }

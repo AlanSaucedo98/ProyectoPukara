@@ -1,6 +1,8 @@
 const express = require("express");
 const app = express();
+const router = express.Router();
 const mongoose = require("mongoose");
+const axios = require("axios")
 
 
 //mongodb models
@@ -36,11 +38,38 @@ app.post("/",async (req, res) => {
     const action = req.body.queryResult.action
 
 
+    let sesionUser = ""
+    let usuario = ""
+
     switch (action) {
         case "input.welcome":
-            res.json({
-                fulfillmentText: `Bienvenidos,Obtenga información al dia sobre la cotización de Bitcoin, Ethereum y Monero en pesos argentinos.Si ya posee una cuenta escriba "Login" de lo contrario ingrese "Register"`
-            })
+
+        sesionUser = req.body.session// Capturo la session del dispositivo para pre-vincular al usuario.
+
+        usuario = await chatbotUsers.findOne({
+            session : sesionUser
+        })
+
+            console.log(usuario);//Para visualizar el usuario obtenido por su session.
+            //console.log(req.body.session)//PAra visualizar los datos recibidos por el body.
+
+            if (usuario != null ) {
+                res.json({
+                    fulfillmentText: `
+                    Bienvenido ${usuario.firstName}!
+¡Por favor indique de que criptomoneda desea saber la cotizacion(Puede hacerlo clickeando la opcion deseada) !
+ 1- /Bitcoin
+ 2- /Ethereum 
+ 3- /Monero
+ 4- /Todas`
+                });
+            } else {
+                res.json({
+                    fulfillmentText: `No se encuentra registrado, para acceder a nuestro servicio debe registrarse.
+                                    ¿Si desea registrarse haga click en el siguiente enlace "/registrarse"? `
+                });
+            }
+            
             break;
         case "register":
 
@@ -48,15 +77,23 @@ app.post("/",async (req, res) => {
                 nombre, ciudad, country, dni, email
             } = req.body.queryResult.parameters
 
-            //console.log(req.body); //Linea para ver datos recibidos.
+            const{session } = req.body.session
+            console.log(req.body); //Linea para ver datos recibidos.
 
 
-            saveUserData(nombre,ciudad,country,dni,email);
+            saveUserData(nombre,ciudad,country,dni,email,session);
 
             res.json({
                 fulfillmentText: `Sus datos son :
-                nombre: ${nombre},ciudad : ${ciudad},country: ${country},DNI : ${dni},email : ${email}.Si los datos son correcto escriba "Si" de lo contrario ingrese "No"`
+                nombre: ${nombre},ciudad : ${ciudad},country: ${country},DNI : ${dni},email : ${email}.
+¡Por favor indique de que criptomoneda desea saber la cotizacion(Puede hacerlo clickeando la opcion deseada) !
+1- /Bitcoin
+2- /Ethereum 
+3- /Monero
+4- /Todas`
             })
+
+
             async function saveUserData (nombre,ciudad,country,dni,email){
                 let isRegistered = await chatbotUsers.findOne({emails:email});
                 if (isRegistered) return;
@@ -67,8 +104,8 @@ app.post("/",async (req, res) => {
                     city: ciudad,
                     country: country,
                     dni : dni,
-                    emails: email
-
+                    emails: email,
+                    session : req.body.session
                 });
                  ChatbotUser.save((err,res)=>{
                     if(err) return console.log(err);
@@ -78,35 +115,59 @@ app.post("/",async (req, res) => {
 
             
             break;
+            case "bitcoin":
+            axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=ars`).then(respuesta => {
+                res.json({
+                    fulfillmentText: `El valor actual de Bitcoint en pesos Argentinos es de $ ${respuesta.data.bitcoin.ars}!`
+                })
+            });
+            break;
+            case "ethereum":
+            axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=ars`).then(respuesta => {
+                res.json({
+                    fulfillmentText: `El valor actual de Ethereum en pesos Argentinos es de $ ${respuesta.data.ethereum.ars}!`
+                })
+            });
+            break;
+
+        case "monero":
+            axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=monero&vs_currencies=ars`).then(respuesta => {
+                res.json({
+                    fulfillmentText: `El valor actual de Monero en pesos Argentinos es de $ ${respuesta.data.monero.ars}!`
+                })
+            });
+            break;
+            default:
+            res.json({
+                fulfillmentText: "Lo siento ,no comprendo su consulta.Por Favor intentelo nuevamente "
+            });
+            break
         
     }
 
-    if(action == "login"){
-
-            const {email} = req.body.queryResult.parameters
-
-            console.log(req.body);
-
-            login(email)
-
-            async function login (email){
-
-                let isRegistered = await chatbotUsers.findOne({emails:email});
-                if (isRegistered) 
-                    res.json({
-                        fulfillmentText: "Sesion Iniciada Correctamente . Ingrese el numero de la opcion por la cual desea obtener informacion : 1-Bitcoin  , 2:Ethereum  ,3- Monero "
-                    })
-                if(!isRegistered)
-                res.json({
-                    fulfillmentText: "No se encontro una cuenta asosiada a ese email "
-                })
-
-            }
-
-        }
-
+    
 
 })
 
-app.use('/api',userApiRouter.all)
-app.listen(3000)
+app.get('/api',async (req,res)=>{
+
+    await mongoose.connect('mongodb+srv://alansaucedo:proyectopukara@cluster0.rvmng.mongodb.net/chatbotdb?retryWrites=true&w=majority', {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        useFindAndModify: false,
+        useCreateIndex: true
+    }, (err, res) => {
+        if (err) return console.log("Error en la db", err);
+        console.log("Base de datos online");
+    });
+
+    const usuarios = await chatbotUsers.find({});
+    console.log(usuarios);
+    res.send({
+        usuarios: usuarios
+    });
+
+})
+
+
+app.listen(8080)

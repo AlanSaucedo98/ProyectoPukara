@@ -9,8 +9,8 @@ const ChatbotUsersSchema = new Schema({
     city: String,
     country: String,
     dni : [Number],
-    emails: [{type: mongoose.SchemaTypes.Email}]
-
+    emails: [{type: mongoose.SchemaTypes.Email}],
+    session: String
 }, {
     timestamps: true
 });

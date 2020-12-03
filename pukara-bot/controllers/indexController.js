@@ -1,12 +1,15 @@
+const express = require("express");
+const app = express();
+const router = express.Router();
 const mongoose = require("mongoose");
+const axios = require("axios")
 
 
-//mongodb models
 
-const chatbotUsers = require("../Models/chatbotUsers");
+const chatbotUsers = require("../../Models/chatbotUsers");
 
 module.exports = {
-    all :async(req,res) => {
+    datos :async(req,res) => {
 
         await mongoose.connect('mongodb+srv://alansaucedo:proyectopukara@cluster0.rvmng.mongodb.net/chatbotdb?retryWrites=true&w=majority', {
         useNewUrlParser: true,
@@ -25,7 +28,10 @@ module.exports = {
              if(err){
                  console.log(err);
              }
-             return res.json(data)
+             return res.render("index",{
+                 title:"Registro de Usuarios",
+                 data:data
+             })
          }
         
         
