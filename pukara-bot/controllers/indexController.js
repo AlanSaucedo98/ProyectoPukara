@@ -57,6 +57,7 @@ module.exports = {
 
         chatbotUsers.find({firstName:{$regex:'.*'+ buscar + '.*',$options:"i"}})
          .exec(obtenerUsuarios);
+
          function  obtenerUsuarios (err,data){
              if(err){
                  console.log(err);
@@ -66,6 +67,10 @@ module.exports = {
                  data:data
              })
          }
+
+
+
+         
     }
     
     

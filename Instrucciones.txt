@@ -1,0 +1,5 @@
+-1 Iniciar el servidor con Nodemon En carpeta Proyecto Pukara para levantar el serivicio al Bot.
+
+
+
+-2  Iniciar el servidor con Nodemon En carpeta pukara-bot para levantarel servicio web.

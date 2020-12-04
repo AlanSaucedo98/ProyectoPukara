@@ -86,11 +86,7 @@ app.post("/",async (req, res) => {
             res.json({
                 fulfillmentText: `Sus datos son :
                 nombre: ${nombre},ciudad : ${ciudad},country: ${country},DNI : ${dni},email : ${email}.
-¡Por favor indique de que criptomoneda desea saber la cotizacion(Puede hacerlo clickeando la opcion deseada) !
-1- /Bitcoin
-2- /Ethereum 
-3- /Monero
-4- /Todas`
+Desea guardar confirmar su usuario?/si`
             })
 
 
@@ -114,6 +110,48 @@ app.post("/",async (req, res) => {
             }
 
             
+            break;
+
+            case "register.registro-yes":
+
+                
+            
+            res.json({
+                fulfillmentText: `Guardado con exito!!
+Por favor indique que cotización de criptomoneda desea saber:
+                    1- Bitcoin
+                    2- Ethereum 
+                    3- Monero
+                    4- Todas`
+            });
+
+            break;
+            case "register.registro-no":
+                
+                let sessionElim = req.body.session
+
+            elimUserData(sessionElim);
+
+                
+                async function elimUserData (sessionElim){
+                    let isRegistered = await chatbotUsers.deleteOne({ session: sessionElim });
+                    if (isRegistered) return;
+                    
+    
+                    
+                     ChatbotUser.save((err,res)=>{
+                        if(err) return console.log(err);
+                        console.log("Se creo un usuario:",res);
+                    })
+                }
+            
+            
+            res.json({
+                fulfillmentText: `Sus datos NO se guardaron !! Si deasea realizar otra consulta escribanos nuevamente con el comando /hola.Gracias por su tiempo !`
+            });
+
+            console.log(req.body);
+
             break;
             case "bitcoin":
             axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=ars`).then(respuesta => {
