@@ -55,7 +55,7 @@ module.exports = {
 
         let buscar = req.query.search
 
-        chatbotUsers.find({firstName:buscar})
+        chatbotUsers.find({firstName:{$regex:'.*'+ buscar + '.*',$options:"i"}})
          .exec(obtenerUsuarios);
          function  obtenerUsuarios (err,data){
              if(err){
