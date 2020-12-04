@@ -35,6 +35,38 @@ module.exports = {
          }
         
         
+    },
+    search: async(req,res)=>{
+
+        await mongoose.connect('mongodb+srv://alansaucedo:proyectopukara@cluster0.rvmng.mongodb.net/chatbotdb?retryWrites=true&w=majority', {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            useFindAndModify: false,
+            useCreateIndex: true
+        }, (err, res) => {
+            if (err) return console.log("Error en la db", err);
+            console.log("Base de datos online");
+        });
+
+
+        if(req.query.search == ""){
+            res.redirect('/')
+        }
+
+        let buscar = req.query.search
+
+        chatbotUsers.find({firstName:buscar})
+         .exec(obtenerUsuarios);
+         function  obtenerUsuarios (err,data){
+             if(err){
+                 console.log(err);
+             }
+             return res.render("userSearch",{
+                 title:"Resultados de la busqueda",
+                 data:data
+             })
+         }
     }
+    
     
 }
